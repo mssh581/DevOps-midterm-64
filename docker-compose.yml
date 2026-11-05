@@ -1,0 +1,39 @@
+services:
+  db:
+    image: mariadb:11
+    restart: unless-stopped
+    environment:
+      MARIADB_ROOT_PASSWORD: 64240068
+      MARIADB_DATABASE: wordpress
+      MARIADB_USER: wpuser
+      MARIADB_PASSWORD: 64240068
+    volumes:
+      - dbdata:/var/lib/mysql
+
+  wordpress:
+    image: wordpress:fpm-alpine
+    restart: unless-stopped
+    depends_on: [db]
+    environment:
+      WORDPRESS_DB_HOST: db
+      WORDPRESS_DB_NAME: wordpress
+      WORDPRESS_DB_USER: wpuser
+      WORDPRESS_DB_PASSWORD: 64240068
+    volumes:
+      - wpdata:/var/www/html
+
+  nginx:
+    image: nginx:alpine
+    restart: unless-stopped
+    depends_on: [wordpress]
+    ports:
+      - "80:80"
+    volumes:
+      - wpdata:/var/www/html
+
+  certbot:
+    image: certbot/certbot
+
+volumes:
+  dbdata:
+  wpdata:
